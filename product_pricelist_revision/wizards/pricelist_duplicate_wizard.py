@@ -18,16 +18,17 @@ class ProductPricelistItemDuplicateWizard(models.TransientModel):
         PricelistItem = self.env["product.pricelist.item"]
         new_items = PricelistItem
         for item in PricelistItem.browse(self.env.context["active_ids"]):
-            new_items |= item.copy(
-                {
-                    "date_start": self.date_start,
-                    "date_end": self.date_end,
-                    "previous_item_id": item.id,
-                    "fixed_price": item.fixed_price
-                    * (1.0 + self.variation_percent / 100.0),
-                }
-            )
-            item.date_end = self.date_start - relativedelta(seconds=1)
+            if self.variation_percent != 0:
+                new_items |= item.copy(
+                    {
+                        "date_start": self.date_start,
+                        "date_end": self.date_end,
+                        "previous_item_id": item.id,
+                        "fixed_price": item.fixed_price
+                        * (1.0 + self.variation_percent / 100.0),
+                    }
+                )
+                item.date_end = self.date_start - relativedelta(seconds=1)
 
         xmlid = "product_pricelist_revision.product_pricelist_item_action"
         action = self.env["ir.actions.act_window"]._for_xml_id(xmlid)

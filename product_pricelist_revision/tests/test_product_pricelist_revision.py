@@ -109,3 +109,26 @@ class TestProductPricelistRevision(TransactionCase):
         self.assertEqual(new_item.previous_price, 100)
         self.assertEqual(new_item.fixed_price, 150)
         self.assertEqual(new_item.variation_percent, 50)
+
+    def test_wizard_action_apply_no_new_items(self):
+        wizard_obj = self.env["product.pricelist.item.duplicate.wizard"]
+        # Before duplicate there are 4 items
+        self.assertEqual(len(self.pricelist.item_ids), 4)
+
+        # Create wizard from pricelist_item_product_product with variation_percent = 0
+        active_ids = self.pricelist_item_product_product.ids
+        wizard = wizard_obj.with_context(active_ids=active_ids).create(
+            {
+                "date_start": datetime.now(),
+                "date_end": datetime.now(),
+                "variation_percent": 0,
+            }
+        )
+
+        action = wizard.action_apply()
+
+        # Check that no new item was created
+        self.assertEqual(len(self.pricelist.item_ids), 4)
+
+        # Check that the returned action is of type ir.actions.act_window_close
+        self.assertEqual(action.get("type"), "ir.actions.act_window_close")
