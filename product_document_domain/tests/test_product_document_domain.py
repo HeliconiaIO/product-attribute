@@ -38,3 +38,18 @@ class SomethingCase(TransactionCase):
         self.assertEqual(self.product_tmpl.product_document_count, 1)
         self.assertEqual(self.product_var_1.product_document_count, 2)
         self.assertEqual(self.product_var_2.product_document_count, 1)
+
+    def test_product_action_open_documents(self):
+        """Test the document action for product variants"""
+        action = self.product_var_1.action_open_documents()
+        self.assertEqual(
+            action["context"]["default_parent_res_id"], self.product_tmpl.id
+        )
+        self.assertFalse(action["context"]["search_default_context_variant"])
+        self.assertFalse(action["context"]["search_default_context_template"])
+        self.assertTrue(action["context"]["search_default_context_variant_template"])
+
+    def test_template_action_open_documents(self):
+        """Test the document action for product template"""
+        action = self.product_tmpl.action_open_documents()
+        self.assertTrue(action["context"]["search_default_context_template"])
